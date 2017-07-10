@@ -1,0 +1,26 @@
+--cpu Cortex-M3
+"length_meter\stm32f1xx_it.o"
+"length_meter\main.o"
+"length_meter\tim.o"
+"length_meter\stm32f1xx_hal_msp.o"
+"length_meter\gpio.o"
+"length_meter\lcd_lib.o"
+"length_meter\system_stm32f1xx.o"
+"length_meter\stm32f1xx_hal_rcc_ex.o"
+"length_meter\stm32f1xx_hal.o"
+"length_meter\stm32f1xx_hal_dma.o"
+"length_meter\stm32f1xx_hal_tim_ex.o"
+"length_meter\stm32f1xx_hal_gpio.o"
+"length_meter\stm32f1xx_hal_gpio_ex.o"
+"length_meter\stm32f1xx_hal_cortex.o"
+"length_meter\stm32f1xx_hal_pwr.o"
+"length_meter\stm32f1xx_hal_rcc.o"
+"length_meter\stm32f1xx_hal_tim.o"
+"length_meter\stm32f1xx_hal_flash_ex.o"
+"length_meter\stm32f1xx_hal_flash.o"
+"length_meter\startup_stm32f103xb.o"
+--library_type=microlib --strict --scatter "Length_meter\Length_meter.sct"
+
+--diag_suppress=L6329 --summary_stderr --info summarysizes --map --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "Length_meter.map" -o Length_meter\Length_meter.axf
