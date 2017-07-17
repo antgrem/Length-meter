@@ -10,42 +10,34 @@ extern void HAL_Delay(__IO uint32_t nTime);
 void LCDinit(void)//Initializes LCD
 {
 	STM_EVAL_Control_LCD_Init();
-	HAL_Delay(5);
 	STM_EVAL_DataLine_Init();
-	HAL_Delay(5);
 	
 	SET_E_OFF;
-	HAL_Delay(5);
 	SET_RS_OFF;
-	HAL_Delay(5);
 	SET_RW_OFF;
-	
-	HAL_Delay(1000);
+
 	//---------one------
 	HAL_GPIO_WritePin(LDPORT, (LCD_D4 | LCD_D5 | LCD_D6 | LCD_D7), GPIO_PIN_RESET);
-	HAL_Delay(5);
 	HAL_GPIO_WritePin(LDPORT, (LCD_D4 | LCD_D5), GPIO_PIN_SET);//4 bit mode
 	SET_E_ON;
-	HAL_Delay(5);
+//	_delay_ms(1000);
+	HAL_Delay(1);
 	SET_E_OFF;
-	HAL_Delay(5);
-	
+	HAL_Delay(1);
 //	_delay_ms(0xFFFF);
 //---------------------------
 	//-----------two-----------
 	LCDsendCommand((0x02<<4) | (1<<LCD_FUNCTION_2LINES) | (1<<LCD_FUNCTION_10DOTS));//4 bit mode
-		HAL_Delay(5);
 	SET_E_ON;
-	HAL_Delay(5);
+	HAL_Delay(1);
 	SET_E_OFF;
-	HAL_Delay(5);
+	HAL_Delay(1);
 	//-------three-------------
 	LCDsendCommand((0x02<<4) | (1<<LCD_FUNCTION_2LINES) | (1<<LCD_FUNCTION_10DOTS));//4 bit mode
-		HAL_Delay(5);
 	SET_E_ON;
-	HAL_Delay(5);
+	HAL_Delay(1);
 	SET_E_OFF;
-	HAL_Delay(5);
+	HAL_Delay(1);
 	//--------4 bit--dual line---------------
 	LCDsendCommand(0x28);
    //-----increment address, cursor shift------
@@ -63,14 +55,13 @@ void STM_EVAL_Control_LCD_Init(void)
   GPIO_InitTypeDef  GPIO_InitStructure;
   
   /* Enable the GPIO_LED Clock */
-  __HAL_RCC_GPIOB_CLK_ENABLE();
+	__HAL_RCC_GPIOB_CLK_ENABLE();
 
   /* Configure the GPIO_LED pin */
   GPIO_InitStructure.Pin = LCD_E | LCD_RS |LCD_RW;
   GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
+  GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_MEDIUM;
   HAL_GPIO_Init(LCPORT, &GPIO_InitStructure);
-	
 }
 
 
@@ -79,12 +70,12 @@ void STM_EVAL_DataLine_Init(void)
   GPIO_InitTypeDef  GPIO_InitStructure;
   
   /* Enable the GPIO_LED Clock */
-    __HAL_RCC_GPIOB_CLK_ENABLE();
+  	__HAL_RCC_GPIOB_CLK_ENABLE();
 
   /* Configure the GPIO_LED pin */
   GPIO_InitStructure.Pin = (LCD_D4 | LCD_D5 | LCD_D6 | LCD_D7);
   GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
+  GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_MEDIUM;
   HAL_GPIO_Init(LDPORT, &GPIO_InitStructure);
 }
 
@@ -93,8 +84,6 @@ void LCDsendChar(uint8_t ch)		//Sends Char to LCD
 { uint16_t temp;
 	
 	HAL_GPIO_WritePin(LDPORT, (LCD_D4 | LCD_D5 | LCD_D6 | LCD_D7), GPIO_PIN_RESET);
-	_delay_ms(1000);
-	//GPIO_SetBits(LDPORT, (ch&0xF0)>>4);
 	
 	temp = 0;
 	temp |= ((((ch&0xF0)>>4)&0x01)==0) ? 0 : LCD_D4;
@@ -111,7 +100,7 @@ void LCDsendChar(uint8_t ch)		//Sends Char to LCD
 	SET_RS_OFF;
 	_delay_ms(1000);
 	HAL_GPIO_WritePin(LDPORT, (LCD_D4 | LCD_D5 | LCD_D6 | LCD_D7), GPIO_PIN_RESET);
-	_delay_ms(1000);
+	//GPIO_SetBits(LDPORT, ch&0x0F);
 	
 	temp = 0;
 	temp |= (((ch&0x0F)&0x01)==0) ? 0 : LCD_D4;
@@ -127,17 +116,11 @@ void LCDsendChar(uint8_t ch)		//Sends Char to LCD
 	SET_RS_OFF;
 	_delay_ms(1000);
 }
-
 void LCDsendCommand(uint8_t cmd)	//Sends Command to LCD
 { uint16_t temp;
 	
-	SET_RS_OFF;
-		HAL_Delay(5);
-	
 	temp = 0;
 	HAL_GPIO_WritePin(LDPORT, (LCD_D4 | LCD_D5 | LCD_D6 | LCD_D7), GPIO_PIN_RESET);
-	_delay_ms(1000);
-	HAL_Delay(5);
 	//GPIO_SetBits(LDPORT, (cmd&0xF0)>>4);
 	
 	temp |= ((((cmd&0xF0)>>4)&0x01)==0) ? 0 : LCD_D4;
@@ -145,18 +128,12 @@ void LCDsendCommand(uint8_t cmd)	//Sends Command to LCD
 	temp |= ((((cmd&0xF0)>>4)&0x04)==0) ? 0 : LCD_D6;
 	temp |= ((((cmd&0xF0)>>4)&0x08)==0) ? 0 : LCD_D7;
 	HAL_GPIO_WritePin(LDPORT, temp, GPIO_PIN_SET);
-	_delay_ms(1000);	
-	HAL_Delay(5);
 	
 	SET_E_ON;		
 	_delay_ms(1000);
-	HAL_Delay(5);
 	SET_E_OFF;
 	_delay_ms(1000);
-	HAL_Delay(5);
 	HAL_GPIO_WritePin(LDPORT, (LCD_D4 | LCD_D5 | LCD_D6 | LCD_D7), GPIO_PIN_RESET);
-	_delay_ms(1000);
-		HAL_Delay(5);
 	//GPIO_SetBits(LDPORT, cmd&0x0F);
 	
 	temp = 0;
@@ -165,16 +142,11 @@ void LCDsendCommand(uint8_t cmd)	//Sends Command to LCD
 	temp |= (((cmd&0x0F)&0x04)==0) ? 0 : LCD_D6;
 	temp |= (((cmd&0x0F)&0x08)==0) ? 0 : LCD_D7;
 	HAL_GPIO_WritePin(LDPORT, temp, GPIO_PIN_SET);
-		HAL_Delay(5);
 	
 	SET_E_ON;		
 	_delay_ms(1000);
-	HAL_Delay(5);
 	SET_E_OFF;
 	_delay_ms(1000);
-	HAL_Delay(5);
-		SET_RS_ON;
-			HAL_Delay(5);
 }
 
 void LCDclr(void)				//Clears LCD

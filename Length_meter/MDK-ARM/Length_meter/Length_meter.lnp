@@ -5,6 +5,8 @@
 "length_meter\stm32f1xx_hal_msp.o"
 "length_meter\gpio.o"
 "length_meter\lcd_lib.o"
+"length_meter\adc.o"
+"length_meter\iwdg.o"
 "length_meter\system_stm32f1xx.o"
 "length_meter\stm32f1xx_hal_rcc_ex.o"
 "length_meter\stm32f1xx_hal.o"
@@ -18,6 +20,9 @@
 "length_meter\stm32f1xx_hal_tim.o"
 "length_meter\stm32f1xx_hal_flash_ex.o"
 "length_meter\stm32f1xx_hal_flash.o"
+"length_meter\stm32f1xx_hal_adc.o"
+"length_meter\stm32f1xx_hal_adc_ex.o"
+"length_meter\stm32f1xx_hal_iwdg.o"
 "length_meter\startup_stm32f103xb.o"
 --library_type=microlib --strict --scatter "Length_meter\Length_meter.sct"
 

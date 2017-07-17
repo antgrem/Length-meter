@@ -35,12 +35,18 @@
 #include "stm32f1xx.h"
 #include "stm32f1xx_it.h"
 
-/* USER CODE BEGIN 0 */
 
-/* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern ADC_HandleTypeDef hadc1;
 extern TIM_HandleTypeDef htim3;
+
+uint16_t Button_cnt = 0;
+extern uint8_t Buttom_flag;
+extern uint16_t lcd_redraw_cnt;
+extern uint16_t Count_meter_magnet;
+extern uint16_t adc_timeout;
+extern uint16_t adc_start_cnt;
 
 /******************************************************************************/
 /*            Cortex-M3 Processor Interruption and Exception Handlers         */ 
@@ -51,12 +57,7 @@ extern TIM_HandleTypeDef htim3;
 */
 void NMI_Handler(void)
 {
-  /* USER CODE BEGIN NonMaskableInt_IRQn 0 */
 
-  /* USER CODE END NonMaskableInt_IRQn 0 */
-  /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
-
-  /* USER CODE END NonMaskableInt_IRQn 1 */
 }
 
 /**
@@ -64,15 +65,11 @@ void NMI_Handler(void)
 */
 void HardFault_Handler(void)
 {
-  /* USER CODE BEGIN HardFault_IRQn 0 */
 
-  /* USER CODE END HardFault_IRQn 0 */
   while (1)
   {
   }
-  /* USER CODE BEGIN HardFault_IRQn 1 */
 
-  /* USER CODE END HardFault_IRQn 1 */
 }
 
 /**
@@ -112,15 +109,11 @@ void BusFault_Handler(void)
 */
 void UsageFault_Handler(void)
 {
-  /* USER CODE BEGIN UsageFault_IRQn 0 */
-
-  /* USER CODE END UsageFault_IRQn 0 */
+  
   while (1)
   {
   }
-  /* USER CODE BEGIN UsageFault_IRQn 1 */
-
-  /* USER CODE END UsageFault_IRQn 1 */
+  
 }
 
 /**
@@ -128,12 +121,7 @@ void UsageFault_Handler(void)
 */
 void SVC_Handler(void)
 {
-  /* USER CODE BEGIN SVCall_IRQn 0 */
 
-  /* USER CODE END SVCall_IRQn 0 */
-  /* USER CODE BEGIN SVCall_IRQn 1 */
-
-  /* USER CODE END SVCall_IRQn 1 */
 }
 
 /**
@@ -141,12 +129,7 @@ void SVC_Handler(void)
 */
 void DebugMon_Handler(void)
 {
-  /* USER CODE BEGIN DebugMonitor_IRQn 0 */
 
-  /* USER CODE END DebugMonitor_IRQn 0 */
-  /* USER CODE BEGIN DebugMonitor_IRQn 1 */
-
-  /* USER CODE END DebugMonitor_IRQn 1 */
 }
 
 /**
@@ -154,12 +137,7 @@ void DebugMon_Handler(void)
 */
 void PendSV_Handler(void)
 {
-  /* USER CODE BEGIN PendSV_IRQn 0 */
 
-  /* USER CODE END PendSV_IRQn 0 */
-  /* USER CODE BEGIN PendSV_IRQn 1 */
-
-  /* USER CODE END PendSV_IRQn 1 */
 }
 
 /**
@@ -167,20 +145,22 @@ void PendSV_Handler(void)
 */
 void SysTick_Handler(void)
 {
-  /* USER CODE BEGIN SysTick_IRQn 0 */
-static unsigned int i = 0;
-  /* USER CODE END SysTick_IRQn 0 */
+
+	if (Button_cnt != 0)
+		Button_cnt--;
+	
+	if (lcd_redraw_cnt != 0)
+		lcd_redraw_cnt--;
+	
+	if (adc_timeout != 0)
+		adc_timeout--;
+	
+	if (adc_start_cnt != 0)
+		adc_start_cnt--;
+	
   HAL_IncTick();
   HAL_SYSTICK_IRQHandler();
-	
-	if (i++ == 1000)
-	{
-		i = 0;
-		HAL_GPIO_TogglePin(Led2_GPIO_Port, Led2_Pin);
-	}
-  /* USER CODE BEGIN SysTick_IRQn 1 */
 
-  /* USER CODE END SysTick_IRQn 1 */
 }
 
 /******************************************************************************/
@@ -195,31 +175,48 @@ static unsigned int i = 0;
 */
 void EXTI0_IRQHandler(void)
 {
-  /* USER CODE BEGIN EXTI0_IRQn 0 */
-	HAL_GPIO_TogglePin(Led1_GPIO_Port, Led1_Pin);
-  /* USER CODE END EXTI0_IRQn 0 */
+  
+	if (Button_cnt == 0)
+	{
+		Button_cnt = 1000;
+		Buttom_flag = 1;
+	}
+	
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
-  /* USER CODE BEGIN EXTI0_IRQn 1 */
-
-  /* USER CODE END EXTI0_IRQn 1 */
+  
 }
+
+/**
+* @brief This function handles ADC1 and ADC2 global interrupts.
+*/
+void ADC1_2_IRQHandler(void)
+{
+
+  HAL_ADC_IRQHandler(&hadc1);
+
+}
+
 
 /**
 * @brief This function handles TIM3 global interrupt.
 */
 void TIM3_IRQHandler(void)
 {
-  /* USER CODE BEGIN TIM3_IRQn 0 */
-	HAL_GPIO_TogglePin(Led2_GPIO_Port, Led2_Pin);
-  /* USER CODE END TIM3_IRQn 0 */
-	
-  HAL_TIM_IRQHandler(&htim3);
-  /* USER CODE BEGIN TIM3_IRQn 1 */
 
-  /* USER CODE END TIM3_IRQn 1 */
+  HAL_TIM_IRQHandler(&htim3);
+  
 }
 
-/* USER CODE BEGIN 1 */
 
-/* USER CODE END 1 */
+/**
+* @brief This function handles EXTI line[15:10] interrupts.
+*/
+void EXTI15_10_IRQHandler(void)
+{
+
+	Count_meter_magnet += 1;
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_11);
+
+}
+
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
