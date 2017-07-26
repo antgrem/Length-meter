@@ -38,158 +38,88 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f1xx_hal.h"
-#include "adc.h"
 #include "tim.h"
-#include "iwdg.h"
 #include "gpio.h"
-#include <string.h>
 
+
+/* USER CODE BEGIN Includes */
 #include "lcd_lib.h"
-
+/* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
-extern IWDG_HandleTypeDef hiwdg;
+
+/* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-uint8_t Buttom_flag = 0;
-uint16_t lcd_redraw_cnt = 0;
-uint16_t adc_start_cnt = 0;
-volatile 	uint16_t adcResult;
-uint8_t adc_triger = 1;
-volatile uint16_t adc_cnt = 1;
 
-uint16_t Count_meter_magnet = 0, Count_meter_magnet_prev = 0;
-uint16_t Count_meter_optic = 0, Count_meter_optic_prev = 0;
-uint16_t adc_timeout = 0;
-
+/* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 
+/* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
 
+/* USER CODE END PFP */
+
+/* USER CODE BEGIN 0 */
+
+/* USER CODE END 0 */
 
 int main(void)
 {
 
-uint8_t buttom_press = 0;	
-uint8_t str[100];
+  /* USER CODE BEGIN 1 */
+
+  /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
+  /* USER CODE BEGIN Init */
+
+  /* USER CODE END Init */
+
   /* Configure the system clock */
   SystemClock_Config();
+
+  /* USER CODE BEGIN SysInit */
+
+  /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_TIM3_Init();
-	HAL_ADC_MspInit(&hadc1);
-	MX_ADC1_Init();
-  MX_IWDG_Init();
-	HAL_IWDG_Start(&hiwdg);
 
-	HAL_Delay(100);
+  /* USER CODE BEGIN 2 */
+	HAL_TIM_Base_Start(&htim3);
+	
 	
 	LCDinit();
 	HAL_Delay(10);
-	LCDinit();
-  
-	LCDclr();
+  LCDclr();
   HAL_Delay(10);
-	LCDcursorOFF();
- 
+	LCDGotoXY(1,1);
+//	LCDcursorOn();
 	
+	HAL_Delay(100);
+
+	
+	LCDsendChar('f');
+  /* USER CODE END 2 */
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
 		/* USER CODE BEGIN 3 */
-
-		if (adc_start_cnt == 0)
-			{
-				adc_start_cnt = 100; // adc convertion every 100 ms
-				HAL_ADC_Start(&hadc1);
-				HAL_ADC_PollForConversion(&hadc1, 100);
-				adcResult = HAL_ADC_GetValue(&hadc1);
-				HAL_ADC_Stop(&hadc1);
-				
-				if ((adcResult < 0x200) && (adc_cnt != 0))
-				{
-					adc_cnt--;
-					if (adc_cnt == 0)
-						adc_triger = 1;
-				}
-				if ((adcResult > 0x900) && (adc_triger == 1) && (adc_cnt != 0x5))
-					adc_cnt++;
-				
-				if ((adc_cnt == 0x5) && (adc_timeout == 0))
-				{
-					adc_triger = 0;
-					adc_cnt = 1;
-					adc_timeout = 2000;
-					Count_meter_optic += 1;
-				}
-			}
-		
-		
-		if (Buttom_flag == 1)
-		{
-			buttom_press++;
-			Count_meter_magnet_prev = Count_meter_magnet;
-			Count_meter_magnet = 0;
-			
-			Count_meter_optic_prev = Count_meter_optic;
-			Count_meter_optic = 0;
-			
-			Buttom_flag = 0;
-			LCDclr();
-			HAL_Delay(20);
-			sprintf((char*)str,"%.1f", (float) Count_meter_magnet*0.69); 
-			LCDstring(str, strlen((char*)str));
-			sprintf((char*)str,"Pr%.1f", (float) Count_meter_magnet_prev*0.69);
-			LCDGotoXY(16 - strlen((char*)str), 0);
-			LCDstring(str, strlen((char*)str));
-									
-			LCDGotoXY(0, 1);
-//			sprintf((char*)str,"%.2f    %x", (float) Count_meter_magnet*0.69, adcResult); 
-//			LCDstring(str, strlen((char*)str));
-			
-			sprintf((char*)str,"%.1f  %x", (float) Count_meter_optic*0.69, adcResult); 
-			LCDstring(str, strlen((char*)str));
-			sprintf((char*)str,"Pr%.1f", (float) Count_meter_optic_prev*0.69);
-			LCDGotoXY(16 - strlen((char*)str), 1);
-			LCDstring(str, strlen((char*)str));
-		}
-		
-		if (lcd_redraw_cnt == 0)
-		{
-			lcd_redraw_cnt = 200;//redraw every 200 ms
-			LCDclr();
-			HAL_Delay(20);
-			sprintf((char*)str,"%.1f", (float) Count_meter_magnet*0.69); 
-			LCDstring(str, strlen((char*)str));
-			sprintf((char*)str,"Pr%.1f", (float) Count_meter_magnet_prev*0.69);
-			LCDGotoXY(16 - strlen((char*)str), 0);
-			LCDstring(str, strlen((char*)str));
-						
-			LCDGotoXY(0, 1);
-//			sprintf((char*)str,"%.2f    %x", (float) Count_meter_magnet*0.69, adcResult); 
-//			LCDstring(str, strlen((char*)str));
-			
-			sprintf((char*)str,"%.1f  %x", (float) Count_meter_optic*0.69, adcResult); 
-			LCDstring(str, strlen((char*)str));
-			sprintf((char*)str,"Pr%.1f", (float) Count_meter_optic_prev*0.69);
-			LCDGotoXY(16 - strlen((char*)str), 1);
-			LCDstring(str, strlen((char*)str));
-			 
-		}
-		
-		HAL_IWDG_Refresh(&hiwdg);
-		
+	HAL_Delay(1000);
+	
+	LCDsendChar('f');
 
   }
+  /* USER CODE END 3 */
 
 }
 
@@ -200,18 +130,16 @@ void SystemClock_Config(void)
 
   RCC_OscInitTypeDef RCC_OscInitStruct;
   RCC_ClkInitTypeDef RCC_ClkInitStruct;
-  RCC_PeriphCLKInitTypeDef PeriphClkInit;
 
     /**Initializes the CPU, AHB and APB busses clocks 
     */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL3;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
@@ -226,14 +154,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
-  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV2;
-  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
